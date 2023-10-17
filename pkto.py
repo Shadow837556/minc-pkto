@@ -19,7 +19,11 @@ for i in range(len(list_files)):
 # Переменные, не зависящие от станции
 Rlev, Rprav = 300, 7000
 minFi_dR = [1000, 500, 100]
+minFi_dRmin = 0.1
+minFi_dVmin = 0.0001
 minFi_dV = 1
+minFi_jmax = 100
+minFi_nmax = 100
 beta0 = pi/4
 dbeta = 1
 MAXPOINTS = 100
@@ -642,7 +646,7 @@ def spFiR(min_points, R, ch, Pr):
         
         # print('V1, V2, V3, fi_a.V, Vpred:', V1, V2, V3, fi_a.V, Vpred)
         # print('V%(i)s; fi_V%(i)s: %(V)s; %(fi)s' % {'i': chn, 'V': fi_a.V, 'fi': fi_a.fi_V})
-        while abs(V2 - V1) > 0.0001 and abs(Vpred - fi_a.V) > 0.0001 and chn < 100:
+        while abs(V2 - V1) > minFi_dVmin and abs(Vpred - fi_a.V) > minFi_dVmin and chn < minFi_nmax:
             Vpred = fi_a.V
             
             V = Bl13_2([V1, V2, V3], [fi_V1, fi_V2, fi_V3], fi_b.V, fi_b.fi_V)
@@ -687,7 +691,7 @@ def spFiR(min_points, R, ch, Pr):
                 fi_V3 = fi_V31
 
             # print(V1, V2, V3, fi_b.V)
-            if chn > 100:
+            if chn > minFi_nmax:
                 fi_a.R = R
                 fi_a.fi_R = fi_a.fi_V
                 Pr[0] = 4
@@ -695,7 +699,7 @@ def spFiR(min_points, R, ch, Pr):
         
 
 
-        if abs(V2 - V1) <= 0.0001 or abs(Vpred - fi_a.V) < 0.0001:
+        if abs(V2 - V1) <= minFi_dVmin or abs(Vpred - fi_a.V) < minFi_dVmin:
             if fi_a.fi_V > fi_b.fi_V:
                 fi_a = fi_b
                 fi_a.R = R
@@ -703,7 +707,7 @@ def spFiR(min_points, R, ch, Pr):
                 fi_a.R = R
                 fi_a.fi_R = fi_a.fi_V
         
-        if abs(Vst - fi_a.V) < 0.0001 and Pr[3] == 1:
+        if abs(Vst - fi_a.V) < minFi_dVmin and Pr[3] == 1:
             Pr[2] = 1
         else:
             Pr[2] = 0
@@ -931,7 +935,7 @@ def procMinimizeFunc(file):
         file.write('Second part is done. Parameters:\nR1: %s\nV1: %s\nfi1: %s\nR2: %s\nV2: %s\nfi2: %s\nR3: %s\nV3: %s\nfi3: %s\nRs: %s\nVs: %s\nfis: %s\n' % (R_min[0], V_min[0], fi_min[0], R_min[1], V_min[1], fi_min[1], R_min[2], V_min[2], fi_min[2], fi_last.R, fi_last.V, fi_last.fi_R))
     print('Second part is done. Parameters:\nR1:%s\nV1:%s\nfi1:%s\nR2:%s\nV2:%s\nfi2:%s\nR3:%s\nV3:%s\nfi3:%s' % (R_min[0], V_min[0], fi_min[0], R_min[1], V_min[1], fi_min[1], R_min[2], V_min[2], fi_min[2]))
 
-    while abs(R_min[1] - R_min[0]) > 0.1 and abs(Rpred - Rr) > 0.1 and ch[1] < 100:
+    while abs(R_min[1] - R_min[0]) > minFi_dRmin and abs(Rpred - Rr) > minFi_dRmin and ch[1] < minFi_jmax:
 
         Rpred = fi_now.R
         
@@ -1006,9 +1010,8 @@ def procMinimizeFunc(file):
         
         with open(file_procMinimizeFunc, 'a') as file:
             file.write('Second+ part is done. Parameters:\nR1: %s\nV1: %s\nfi1: %s\nR2: %s\nV2: %s\nfi2: %s\nR3: %s\nV3: %s\nfi3: %s\nRs: %s\nVs: %s\nfis: %s\n' % (R_min[0], V_min[0], fi_min[0], R_min[1], V_min[1], fi_min[1], R_min[2], V_min[2], fi_min[2], fi_last.R, fi_last.V, fi_last.fi_R))
-        
     else:
-        if ch[1] > 100:
+        if ch[1] > minFi_jmax:
             Pr[0] = 2
             Bl19(Pr[0])
             return ret_value
