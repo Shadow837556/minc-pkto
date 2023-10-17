@@ -846,10 +846,19 @@ def procMinimizeFunc(file):
         
         if abs(fi_now.R - Rk) > minFi_dR[0] + minFi_dR[1]:
             Rr = fi_now.R + dR
-        elif Rr == Rprav or Rr == Rlev:
-            Rr = Rk - (dR/abs(dR)) * minFi_dR[2]
         else:
-            Rr = Rk
+            fi_Rk = spFiR(min_points, Rk, ch, Pr)
+            fi_now = spFiR(min_points, Rk - minFi_dR[2], ch, Pr)
+
+            if fi_Rk.fi_R < fi_now.fi_R:
+                print('Min outside the sigment')
+                Pr[0] = 1
+                Bl19(Pr[0])
+                return ret_value
+            else:
+                fi_last = fi_now
+                fi_now = fi_Rk
+                break
         
         fi_now = spFiR(min_points, Rr, ch, Pr)
         
